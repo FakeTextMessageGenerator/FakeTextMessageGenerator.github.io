@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fake Text Message Generator | Make Fake Text Conversation</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Create realistic fake iOS text message conversations. Customize battery, signal, avatar, and more. Supports emojis, Arabic (RTL), and iPhone 15 Pro layouts.">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    /* iOS Font Stack */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    
+    /* Scrollbar hiding for the preview */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* iOS Blue Color */
+    .bg-ios-blue { background-color: #007AFF; }
+    .text-ios-blue { color: #007AFF; }
+    
+    /* iOS Grey Color */
+    .bg-ios-gray { background-color: #E9E9EB; }
+    
+    /* Phone Scaling for small screens */
+    #phone-wrapper {
+      transform-origin: top center;
+      transition: transform 0.2s;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+<div class="min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="bg-white shadow-sm sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto py-4 px-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/><path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"/></svg>
+        </div>
+        <h1 class="text-xl font-bold tracking-tight">Fake Text Message Generator</h1>
+      </div>
+     </div>
+  </header>
+
+  <main class="flex-grow container mx-auto p-4 lg:p-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- LEFT: Settings Panel -->
+      <div class="lg:col-span-5 xl:col-span-4 space-y-6">
+        
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <!-- Custom Tabs -->
+          <div class="flex border-b border-gray-100 bg-gray-50/50" id="tabs-container">
+            <button data-section="messages" class="flex-1 py-3 text-sm font-semibold border-b-2 border-blue-500 text-blue-600 transition-colors">Messages</button>
+            <button data-section="details" class="flex-1 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors">Details</button>
+            <button data-section="status" class="flex-1 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors">Status Bar</button>
+          </div>
+
+          <div class="p-5 h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar" id="control-sections">
+            
+            <!-- 1. Messages Tab -->
+            <div data-section-content="messages" class="space-y-4">
+              <div id="messages-list-container" class="space-y-3">
+                <!-- Messages injected via JS -->
+              </div>
+              
+              <button id="add-message-btn" class="w-full mt-2 py-2.5 px-4 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 font-medium hover:border-blue-400 hover:text-blue-600 transition-all flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Add New Message
+              </button>
+            </div>
+
+            <!-- 2. Details Tab -->
+            <div data-section-content="details" class="space-y-5 hidden">
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Contact Name</label>
+                <input type="text" id="contactName" data-setting="contactName" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Profile Picture</label>
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden border border-gray-300 relative">
+                        <img id="avatar-preview-setting" src="" class="w-full h-full object-cover hidden">
+                        <svg id="avatar-placeholder-setting" class="w-full h-full text-gray-400 p-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+                    </div>
+                    <label class="cursor-pointer bg-white border border-gray-300 px-3 py-1.5 rounded-md text-sm font-medium shadow-sm hover:bg-gray-50">
+                        Upload
+                        <input type="file" id="avatarUpload" accept="image/*" class="hidden">
+                    </label>
+                    <button id="removeAvatar" class="text-red-500 text-sm hover:underline hidden">Remove</button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Clock Time</label>
+                <input type="text" id="time" data-setting="time" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+              </div>
+            </div>
+
+            <!-- 3. Status Bar Tab -->
+            <div data-section-content="status" class="space-y-5 hidden">
+               <!-- Battery -->
+               <div>
+                 <div class="flex justify-between mb-1">
+                   <label class="text-xs font-bold text-gray-500 uppercase">Battery Level</label>
+                   <span class="text-xs font-bold text-blue-600"><span id="batteryLevel-value">100</span>%</span>
+                 </div>
+                 <input type="range" id="batteryLevel" data-setting="batteryLevel" min="0" max="100" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-500">
+               </div>
+
+               <!-- Signal -->
+               <div>
+                 <div class="flex justify-between mb-1">
+                   <label class="text-xs font-bold text-gray-500 uppercase">Signal Strength</label>
+                   <span class="text-xs font-bold text-blue-600"><span id="signalStrength-value">4</span> Bars</span>
+                 </div>
+                 <input type="range" id="signalStrength" data-setting="signalStrength" min="0" max="4" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black">
+               </div>
+
+               <!-- Toggles -->
+               <div class="space-y-3 pt-2">
+                 <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <span class="text-sm font-medium">Connection Type</span>
+                    <select id="connectionType" data-setting="connectionType" class="bg-white border border-gray-300 text-sm rounded px-2 py-1 outline-none">
+                        <option value="5G">5G</option>
+                        <option value="4G">4G</option>
+                        <option value="LTE">LTE</option>
+                        <option value="WiFi">WiFi</option>
+                    </select>
+                 </div>
+                 
+                 <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <span class="text-sm font-medium">Show Battery %</span>
+                    <input type="checkbox" id="showBatteryPercent" data-setting="showBatteryPercent" class="w-5 h-5 accent-blue-600 rounded">
+                 </div>
+               </div>
+            </div>
+
+          </div>
+
+          <!-- Download Action -->
+          <div class="p-5 border-t border-gray-100 bg-gray-50">
+            <button id="download-btn" class="w-full py-3.5 px-4 bg-gray-900 hover:bg-black text-white rounded-xl font-bold shadow-lg shadow-gray-300/50 transition-transform active:scale-95 flex items-center justify-center gap-2">
+               <span>Download Image</span>
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- SEO Text Block (Collapsible for cleaner UI) -->
+        <details class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 text-sm text-gray-600">
+            <summary class="cursor-pointer font-medium text-gray-800">About this tool</summary>
+            <div class="mt-3 space-y-2">
+                <p>The best <strong>Fake Text Message Generator</strong> available. Create realistic chat screenshots for memes, stories, or pranks.</p>
+                <p>Features support for emojis, Arabic text (RTL), image avatars, and iPhone 14/15/16 Pro layouts.</p>
+            </div>
+        </details>
+
+      </div>
+
+      <!-- RIGHT: Phone Preview -->
+      <div class="lg:col-span-7 xl:col-span-8 bg-gray-100 flex items-start justify-center pt-4 lg:pt-0 overflow-hidden relative">
+        
+        <!-- Scaling Wrapper -->
+        <div id="phone-wrapper">
+            <div id="phonePreview" class="relative w-[400px] h-[860px] bg-white rounded-[60px] shadow-2xl border-[12px] border-gray-900 overflow-hidden flex flex-col select-none ring-1 ring-black/10">
+            
+            <!-- Dynamic Island / Notch Area -->
+            <div class="absolute top-0 left-0 right-0 h-[50px] z-20 pointer-events-none flex justify-center">
+                <div class="w-[120px] h-[35px] bg-black rounded-b-[24px] mt-0 relative">
+                    <!-- Camera lens simulation -->
+                    <div class="absolute right-[20%] top-[10px] w-3 h-3 bg-[#1a1a1a] rounded-full opacity-60"></div>
+                </div>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="h-[54px] pl-8 pr-7 flex justify-between items-end pb-2 text-black text-[15px] font-semibold z-10 bg-white">
+                <div id="preview-time" class="tracking-wide">9:41</div>
+                <div class="flex items-center gap-1.5 pb-0.5">
+                    <!-- Signal -->
+                    <div class="flex items-end gap-[2px] h-3" id="preview-signal">
+                         <!-- Filled by JS -->
+                    </div>
+                    <!-- Connection -->
+                    <div id="preview-connection" class="text-[13px] font-bold mx-0.5">5G</div>
+                    <!-- Battery -->
+                    <div class="flex items-center gap-1">
+                        <span id="preview-battery-percent" class="text-[13px] tracking-tight hidden">100%</span>
+                        <div class="w-[25px] h-[12px] rounded-[3px] border-[1.5px] border-black/30 p-[1.5px] relative opacity-90">
+                            <div id="preview-battery-bar" class="h-full bg-black rounded-[1px] w-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- App Header -->
+            <div class="h-[50px] bg-white/90 backdrop-blur-md flex items-center justify-between px-3 z-10 border-b border-gray-100/50">
+                <div class="flex items-center text-ios-blue">
+                    <svg class="w-8 h-8 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                    <span class="text-[17px] -ml-1 font-medium">925</span>
+                </div>
+                
+                <div class="flex flex-col items-center justify-center -ml-4">
+                    <div class="w-8 h-8 rounded-full bg-gray-300 overflow-hidden mb-0.5" id="preview-header-avatar-container" style="display:none;">
+                        <img id="preview-header-avatar" src="" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex flex-col items-center leading-none">
+                        <span id="preview-contactName" class="text-[14px] font-semibold text-black">Mom</span>
+                        <svg class="w-3 h-3 text-gray-400 mt-[2px]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                    </div>
+                </div>
+
+                <div class="w-10 flex justify-end">
+                    <svg class="w-7 h-7 text-ios-blue" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div id="preview-messages-container" class="flex-grow bg-white p-4 overflow-y-auto no-scrollbar flex flex-col space-y-1.5 pb-6">
+                <!-- Messages go here -->
+            </div>
+
+            <!-- Input Area -->
+            <div class="h-[60px] bg-white px-3 flex items-center gap-3 z-10 pb-4">
+                 <div class="p-1.5 bg-gray-200 rounded-full text-gray-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                 </div>
+                 <div class="flex-grow h-[36px] rounded-full border border-gray-300 flex items-center px-4 justify-between">
+                    <span class="text-[17px] text-gray-400">iMessage</span>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                 </div>
+            </div>
+
+            <!-- Home Indicator -->
+            <div class="absolute bottom-2 left-0 right-0 flex justify-center z-20">
+                <div class="w-[140px] h-[5px] bg-black rounded-full"></div>
+            </div>
+
+            </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- STATE MANAGEMENT ---
+    let activeSection = 'messages';
+    
+    let settings = {
+        contactName: 'Mom',
+        avatarUrl: null,
+        time: '9:41',
+        connectionType: '5G',
+        signalStrength: 4,
+        batteryLevel: 100,
+        showBatteryPercent: false
+    };
+
+    let messages = [
+        { id: 1, text: 'Hello! How are you?', type: 'incoming' },
+        { id: 2, text: 'I\'m good thanks! Just working on some code.', type: 'outgoing' },
+        { id: 3, text: 'That sounds great 👍', type: 'incoming' }
+    ];
+
+    // --- DOM ELEMENTS ---
+    const phoneWrapper = document.getElementById('phone-wrapper');
+    const phonePreviewEl = document.getElementById('phonePreview');
+    const tabsContainer = document.getElementById('tabs-container');
+    const messagesListContainer = document.getElementById('messages-list-container');
+    const addMessageBtn = document.getElementById('add-message-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const previewMessagesContainer = document.getElementById('preview-messages-container');
+    const avatarUpload = document.getElementById('avatarUpload');
+    const removeAvatarBtn = document.getElementById('removeAvatar');
+
+    // --- RESPONSIVE SCALING ---
+    function scalePhone() {
+        const containerWidth = phoneWrapper.parentElement.clientWidth;
+        // Phone width is 400px + 24px border total roughly
+        const phoneTotalWidth = 424; 
+        
+        if (containerWidth < phoneTotalWidth) {
+            const scale = (containerWidth - 32) / phoneTotalWidth; // 32px padding
+            phoneWrapper.style.transform = `scale(${scale})`;
+            // Adjust height of container to avoid extra whitespace
+            const height = 860 * scale; 
+            phoneWrapper.parentElement.style.height = `${height + 50}px`;
+        } else {
+            phoneWrapper.style.transform = 'scale(1)';
+            phoneWrapper.parentElement.style.height = 'auto';
+        }
+    }
+    window.addEventListener('resize', scalePhone);
+    scalePhone(); // Initial call
+
+    // --- RENDERING LOGIC ---
+
+    function renderTabs() {
+        tabsContainer.querySelectorAll('button').forEach(btn => {
+            const isActive = btn.dataset.section === activeSection;
+            btn.className = isActive 
+                ? 'flex-1 py-3 text-sm font-semibold border-b-2 border-blue-500 text-blue-600 transition-colors'
+                : 'flex-1 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors';
+        });
+
+        document.querySelectorAll('[data-section-content]').forEach(content => {
+            content.style.display = content.dataset.sectionContent === activeSection ? 'block' : 'none';
+        });
+    }
+
+    function updateSettingsInputs() {
+        document.querySelectorAll('[data-setting]').forEach(input => {
+            const key = input.dataset.setting;
+            if (input.type === 'checkbox') input.checked = settings[key];
+            else input.value = settings[key];
+        });
+        document.getElementById('batteryLevel-value').textContent = settings.batteryLevel;
+        document.getElementById('signalStrength-value').textContent = settings.signalStrength;
+    }
+
+    function renderMessagesControl() {
+        messagesListContainer.innerHTML = '';
+        messages.forEach((msg, index) => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2 bg-white p-2 rounded-lg border border-gray-200 shadow-sm';
+            
+            div.innerHTML = `
+                <button data-toggle-id="${msg.id}" class="w-8 h-8 rounded-full flex items-center justify-center transition-colors ${msg.type === 'incoming' ? 'bg-gray-200 text-gray-600' : 'bg-blue-500 text-white'}" title="Toggle Direction">
+                  ${msg.type === 'incoming' 
+                    ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>' 
+                    : '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m0 0l-7-7m7 7l-7 7"/></svg>'}
+                </button>
+                <input type="text" value="${msg.text}" data-msg-id="${msg.id}" class="flex-grow px-2 py-1 text-sm outline-none bg-transparent" placeholder="Type a message...">
+                <button data-remove-id="${msg.id}" class="p-1.5 text-gray-400 hover:text-red-500 rounded-md hover:bg-red-50 transition-colors">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+            `;
+            messagesListContainer.appendChild(div);
+        });
+    }
+
+    function renderPhonePreview() {
+        // 1. Header Details
+        document.getElementById('preview-time').textContent = settings.time;
+        document.getElementById('preview-contactName').textContent = settings.contactName;
+        
+        // Avatar
+        const avatarContainer = document.getElementById('preview-header-avatar-container');
+        const avatarImg = document.getElementById('preview-header-avatar');
+        if (settings.avatarUrl) {
+            avatarContainer.style.display = 'block';
+            avatarImg.src = settings.avatarUrl;
+        } else {
+            avatarContainer.style.display = 'none';
+        }
+
+        // 2. Status Bar
+        // Signal
+        const signalContainer = document.getElementById('preview-signal');
+        signalContainer.innerHTML = '';
+        for(let i=0; i<4; i++) {
+            const bar = document.createElement('div');
+            bar.className = `w-[4.5px] rounded-[1px] ${i < settings.signalStrength ? 'bg-black' : 'bg-gray-300/60'}`;
+            // Correct heights for iOS bars (stepped)
+            const heights = ['40%', '60%', '80%', '100%'];
+            bar.style.height = heights[i];
+            signalContainer.appendChild(bar);
+        }
+
+        // Connection
+        const connEl = document.getElementById('preview-connection');
+        if (settings.connectionType === 'WiFi') {
+            connEl.innerHTML = '<svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>'; // Simplified Wifi Icon
+            // Better Wifi Icon Path for iOS feel
+            connEl.innerHTML = `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C7.4 3 3.3 4.8 0.3 7.7C-0.1 8.1 -0.1 8.7 0.3 9.1L2 10.8C2.4 11.2 3 11.2 3.4 10.8C5.6 8.7 8.6 7.4 12 7.4C15.4 7.4 18.4 8.7 20.6 10.8C21 11.2 21.6 11.2 22 10.8L23.7 9.1C24.1 8.7 24.1 8.1 23.7 7.7C20.7 4.8 16.6 3 12 3ZM12 11C9.6 11 7.4 11.9 5.7 13.4C5.3 13.8 5.3 14.4 5.7 14.8L11.3 20.4C11.7 20.8 12.3 20.8 12.7 20.4L18.3 14.8C18.7 14.4 18.7 13.8 18.3 13.4C16.6 11.9 14.4 11 12 11Z"/></svg>`;
+        } else {
+            connEl.textContent = settings.connectionType;
+        }
+
+        // Battery
+        const batBar = document.getElementById('preview-battery-bar');
+        const batText = document.getElementById('preview-battery-percent');
+        batBar.style.width = `${settings.batteryLevel}%`;
+        batBar.className = `h-full rounded-[1px] w-full ${settings.batteryLevel <= 20 ? 'bg-red-500' : 'bg-black'}`;
+        
+        if (settings.showBatteryPercent) {
+            batText.textContent = `${settings.batteryLevel}%`;
+            batText.classList.remove('hidden');
+        } else {
+            batText.classList.add('hidden');
+        }
+
+        // 3. Messages Rendering
+        previewMessagesContainer.innerHTML = '';
+        let lastType = null;
+        
+        messages.forEach((msg, index) => {
+            if (!msg.text) return;
+            
+            const isOutgoing = msg.type === 'outgoing';
+            const isSameAsLast = lastType === msg.type;
+            lastType = msg.type;
+
+            const row = document.createElement('div');
+            row.className = `flex w-full ${isOutgoing ? 'justify-end' : 'justify-start'} ${isSameAsLast ? 'mt-[2px]' : 'mt-2'}`;
+            
+            const bubble = document.createElement('div');
+            
+            // Text Direction Detection (Arabic support)
+            const isArabic = /[\u0600-\u06FF]/.test(msg.text);
+            const dir = isArabic ? 'rtl' : 'ltr';
+
+            // Bubble Styling (iOS specifics)
+            let borderRadius = '';
+            if (isOutgoing) {
+                borderRadius = '18px 18px 4px 18px'; // Default tail bottom-right
+                if (isSameAsLast) borderRadius = '18px 18px 18px 18px'; // Stacked
+            } else {
+                borderRadius = '18px 18px 18px 4px'; // Default tail bottom-left
+                if (isSameAsLast) borderRadius = '18px 18px 18px 18px'; // Stacked
+            }
+
+            bubble.style.borderRadius = borderRadius;
+            bubble.style.maxWidth = '75%';
+            bubble.className = `px-[12px] py-[8px] text-[16px] leading-[1.35] relative break-words ${
+                isOutgoing 
+                ? 'bg-ios-blue text-white' 
+                : 'bg-ios-gray text-black'
+            }`;
+            bubble.style.direction = dir;
+            bubble.innerText = msg.text; // Safe text insertion
+            
+            row.appendChild(bubble);
+            previewMessagesContainer.appendChild(row);
+        });
+
+        // Add "Delivered" text to the last outgoing message
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg && lastMsg.type === 'outgoing') {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'w-full flex justify-end px-1 mt-1';
+            statusDiv.innerHTML = '<span class="text-[11px] font-bold text-gray-400">Delivered</span>';
+            previewMessagesContainer.appendChild(statusDiv);
+        }
+
+        // Auto scroll to bottom
+        previewMessagesContainer.scrollTop = previewMessagesContainer.scrollHeight; 
+    }
+
+    // --- EVENT LISTENERS ---
+
+    // Avatar Upload
+    avatarUpload.addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                settings.avatarUrl = e.target.result;
+                document.getElementById('avatar-preview-setting').src = e.target.result;
+                document.getElementById('avatar-preview-setting').classList.remove('hidden');
+                document.getElementById('avatar-placeholder-setting').classList.add('hidden');
+                removeAvatarBtn.classList.remove('hidden');
+                renderPhonePreview();
+            }
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    removeAvatarBtn.addEventListener('click', () => {
+        settings.avatarUrl = null;
+        avatarUpload.value = '';
+        document.getElementById('avatar-preview-setting').classList.add('hidden');
+        document.getElementById('avatar-placeholder-setting').classList.remove('hidden');
+        removeAvatarBtn.classList.add('hidden');
+        renderPhonePreview();
+    });
+
+    // Inputs Change
+    document.getElementById('control-sections').addEventListener('input', (e) => {
+        if (e.target.dataset.setting) {
+            const key = e.target.dataset.setting;
+            const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+            settings[key] = val;
+            updateSettingsInputs();
+            renderPhonePreview();
+        }
+        if (e.target.dataset.msgId) {
+            const id = parseInt(e.target.dataset.msgId);
+            const msg = messages.find(m => m.id === id);
+            if (msg) msg.text = e.target.value;
+            renderPhonePreview();
+        }
+    });
+
+    // Messages Buttons
+    messagesListContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        
+        if (btn.dataset.toggleId) {
+            const id = parseInt(btn.dataset.toggleId);
+            const msg = messages.find(m => m.id === id);
+            if (msg) {
+                msg.type = msg.type === 'incoming' ? 'outgoing' : 'incoming';
+                renderMessagesControl();
+                renderPhonePreview();
+            }
+        } else if (btn.dataset.removeId) {
+            const id = parseInt(btn.dataset.removeId);
+            messages = messages.filter(m => m.id !== id);
+            renderMessagesControl();
+            renderPhonePreview();
+        }
+    });
+
+    addMessageBtn.addEventListener('click', () => {
+        const lastType = messages.length > 0 ? messages[messages.length-1].type : 'incoming';
+        const newType = lastType === 'incoming' ? 'outgoing' : 'incoming';
+        messages.push({ id: Date.now(), text: '', type: newType });
+        renderMessagesControl();
+        renderPhonePreview();
+    });
+
+    tabsContainer.addEventListener('click', (e) => {
+        if (e.target.dataset.section) {
+            activeSection = e.target.dataset.section;
+            renderTabs();
+        }
+    });
+
+    // Download
+    downloadBtn.addEventListener('click', async () => {
+        const originalText = downloadBtn.innerHTML;
+        downloadBtn.disabled = true;
+        downloadBtn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...';
+        
+        // Temporarily remove transform for clean capture
+        const wrapper = document.getElementById('phone-wrapper');
+        const currentTransform = wrapper.style.transform;
+        wrapper.style.transform = 'scale(1)';
+
+        try {
+            await new Promise(resolve => setTimeout(resolve, 100)); // Allow UI to update
+            
+            const canvas = await html2canvas(phonePreviewEl, {
+                scale: 2,
+                backgroundColor: null,
+                useCORS: true,
+                allowTaint: true,
+                logging: false
+            });
+            
+            const link = document.createElement('a');
+            link.download = `imessage_${settings.contactName.replace(/\s/g, '_')}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        } catch (err) {
+            console.error(err);
+            alert('Error generating image');
+        } finally {
+            wrapper.style.transform = currentTransform; // Restore scale
+            downloadBtn.innerHTML = originalText;
+            downloadBtn.disabled = false;
+        }
+    });
+
+    // Init
+    updateSettingsInputs();
+    renderMessagesControl();
+    renderTabs();
+    renderPhonePreview();
+});
+</script>
+
+<!-- SEO Content Section -->
+<section class="bg-white border-t border-gray-200 mt-12 py-16">
+  <div class="max-w-4xl mx-auto px-6 lg:px-8">
+    
+    <!-- H1 Main Title -->
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+        The Ultimate Fake Text Message Generator
+      </h2>
+      <p class="mt-4 text-lg text-gray-600">
+        Create pixel-perfect fake iMessage conversations for memes, storytelling, and pranks.
+      </p>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="grid md:grid-cols-2 gap-8 mb-16">
+      <div class="bg-gray-50 p-6 rounded-2xl">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Why use our iMessage Creator?</h3>
+        <p class="text-gray-600">Our tool is designed to mimic the modern iOS interface accurately. Whether you need a fake chat for a marketing campaign, a funny Twitter meme, or a Wattpad story, we provide the most realistic details including the Dynamic Island, status bar icons, and authentic fonts.</p>
+      </div>
+      <div class="bg-gray-50 p-6 rounded-2xl">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Fully Customizable Details</h3>
+        <p class="text-gray-600">You have 100% control. Change the <strong>carrier name</strong> (WiFi, 5G, LTE), adjust the <strong>battery percentage</strong>, upload a custom <strong>contact photo</strong>, and even toggle the "Delivered" status. It's the most flexible fake text maker on the web.</p>
+      </div>
+    </div>
+
+    <!-- How-To Guide (Steps) -->
+    <div class="mb-16">
+      <h3 class="text-2xl font-bold text-gray-900 mb-6">How to Create a Fake Text Conversation</h3>
+      <ol class="space-y-4">
+        <li class="flex items-start">
+          <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full font-bold mr-4">1</span>
+          <div>
+            <h4 class="font-bold text-gray-900">Set the Scene</h4>
+            <p class="text-gray-600 text-sm">Start by entering the Contact Name (e.g., "Mom", "Boss", "Ex"). Upload a profile picture to make it look authentic. Set the current time and battery life to match your story.</p>
+          </div>
+        </li>
+        <li class="flex items-start">
+          <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full font-bold mr-4">2</span>
+          <div>
+            <h4 class="font-bold text-gray-900">Compose the Chat</h4>
+            <p class="text-gray-600 text-sm">Add messages one by one. Toggle between "Incoming" (Gray) and "Outgoing" (Blue) bubbles. You can use Emojis and create long conversations easily.</p>
+          </div>
+        </li>
+        <li class="flex items-start">
+          <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full font-bold mr-4">3</span>
+          <div>
+            <h4 class="font-bold text-gray-900">Download & Share</h4>
+            <p class="text-gray-600 text-sm">Hit the "Download Image" button. Our tool generates a high-resolution PNG file of your fake iPhone chat, ready to be shared on Instagram, TikTok, or Reddit.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <!-- FAQ Section (Rich Snippets Goldmine) -->
+    <div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h3>
+      <div class="space-y-4">
+        <details class="group bg-white border border-gray-200 rounded-lg p-4 cursor-pointer">
+          <summary class="flex justify-between items-center font-medium text-gray-900 list-none">
+            <span>Is this fake text generator free?</span>
+            <span class="transition group-open:rotate-180">
+              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </summary>
+          <p class="text-gray-600 mt-3 text-sm">Yes! Our fake iMessage generator is 100% free to use. There are no hidden fees, watermarks, or limits on how many images you can download.</p>
+        </details>
+
+        <details class="group bg-white border border-gray-200 rounded-lg p-4 cursor-pointer">
+          <summary class="flex justify-between items-center font-medium text-gray-900 list-none">
+            <span>Is it private? Do you save my chats?</span>
+            <span class="transition group-open:rotate-180">
+              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </summary>
+          <p class="text-gray-600 mt-3 text-sm">Absolutely. Your privacy is our priority. All image generation happens directly in your browser (client-side). We do not store, save, or view any of the conversations you create.</p>
+        </details>
+
+        <details class="group bg-white border border-gray-200 rounded-lg p-4 cursor-pointer">
+          <summary class="flex justify-between items-center font-medium text-gray-900 list-none">
+            <span>Can I use this for commercial purposes?</span>
+            <span class="transition group-open:rotate-180">
+              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </summary>
+          <p class="text-gray-600 mt-3 text-sm">Yes, you can use the generated screenshots for marketing, advertisements, social media posts, or video content. However, please ensure you are not using it to spread misinformation or harm others.</p>
+        </details>
+      </div>
+    </div>
+
+  </div>
+  
+  <!-- Footer -->
+  <div class="mt-16 border-t border-gray-200 pt-8 text-center">
+    <p class="text-sm text-gray-500">&copy; 2026     <p class="text-sm text-gray-500">&copy; 2026 Fake Text Generator. All rights reserved. Built for entertainment purposes.</p>
+. All rights reserved. Built for entertainment purposes.</p>
+  </div>
+</section>
+</body>
+</html>
